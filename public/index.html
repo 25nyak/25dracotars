@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dragon BUSD Staking</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.0/dist/web3.min.js"></script>
+    <script type="module">
+        import web3 from './web3.js';
+        import contract from './contract.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const farmButton = document.getElementById('farmButton');
+            const claimButton = document.getElementById('claimButton');
+            const harvestButton = document.getElementById('harvestButton');
+
+            farmButton.addEventListener('click', async () => {
+                const amount = document.getElementById('amountInput').value;
+                await farm(amount);
+            });
+
+            claimButton.addEventListener('click', async () => {
+                await claim();
+            });
+
+            harvestButton.addEventListener('click', async () => {
+                const amount = document.getElementById('harvestAmountInput').value;
+                await harvest(amount);
+            });
+        });
+
+        async function farm(amount) {
+            const accounts = await web3.eth.getAccounts();
+            const weiAmount = web3.utils.toWei(amount, 'ether'); // Convert amount to Wei
+            await contract.methods.farm(weiAmount).send({ from: accounts[0] });
+        }
+
+        async function claim() {
+            const accounts = await web3.eth.getAccounts();
+            await contract.methods.claim().send({ from: accounts[0] });
+        }
+
+        async function harvest(amount) {
+            const accounts = await web3.eth.getAccounts();
+            const weiAmount = web3.utils.toWei(amount, 'ether'); // Convert amount to Wei
+            await contract.methods.harvest(weiAmount).send({ from: accounts[0] });
+        }
+    </script>
+</head>
+<body>
+    <h1>Dragon BUSD Staking</h1>
+    <div>
+        <h2>Farm</h2>
+        <input type="text" id="amountInput" placeholder="Enter amount to farm">
+        <button id="farmButton">Farm</button>
+    </div>
+    <div>
+        <h2>Claim</h2>
+        <button id="claimButton">Claim</button>
+    </div>
+    <div>
+        <h2>Harvest</h2>
+        <input type="text" id="harvestAmountInput" placeholder="Enter amount to harvest">
+        <button id="harvestButton">Harvest</button>
+    </div>
+</body>
+</html>
+
+
