@@ -1,132 +1,87 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dragon BUSD Staking</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.0/dist/web3.min.js"></script>
-    <script type="module" src="src/contract.js"></script>
-    <script type="module" src="src/web3.js"></script>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <img src="media/images/logo.png" alt="Logo" class="logo">
-            <h1>Dragon BUSD Staking</h1>
-        </header>
-        <main>
-            <button id="connectButton">Connect Wallet</button>
-            <section>
-                <h2>Farm</h2>
-                <input type="text" id="amountInput" placeholder="Enter amount to farm">
-                <button id="farmButton">Farm</button>
-            </section>
-            <section>
-                <h2>Claim</h2>
-                <button id="claimButton">Claim</button>
-            </section>
-            <section>
-                <h2>Harvest</h2>
-                <input type="text" id="harvestAmountInput" placeholder="Enter amount to harvest">
-                <button id="harvestButton">Harvest</button>
-            </section>
-            <section>
-                <h2>My Investment</h2>
-                <p id="investment">Loading...</p>
-            </section>
-            <section>
-                <h2>My Earnings</h2>
-                <p id="earnings">Loading...</p>
-            </section>
-        </main>
-    </div>
-    <script type="module">
-        import web3 from './src/web3.js';
-        import contract from './src/contract.js';
+<script type="module">
+    import web3 from './src/web3.js';
+    import contract from './src/contract.js';
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            const connectButton = document.getElementById('connectButton');
-            const farmButton = document.getElementById('farmButton');
-            const claimButton = document.getElementById('claimButton');
-            const harvestButton = document.getElementById('harvestButton');
+    document.addEventListener('DOMContentLoaded', async () => {
+        const connectButton = document.getElementById('connectButton');
+        const farmButton = document.getElementById('farmButton');
+        const claimButton = document.getElementById('claimButton');
+        const harvestButton = document.getElementById('harvestButton');
 
-            connectButton.addEventListener('click', connectWallet);
+        connectButton.addEventListener('click', connectWallet);
 
-            farmButton.addEventListener('click', async () => {
-                const amount = document.getElementById('amountInput').value;
-                await farm(amount);
-                await updateIndicators();
-            });
-
-            claimButton.addEventListener('click', async () => {
-                await claim();
-                await updateIndicators();
-            });
-
-            harvestButton.addEventListener('click', async () => {
-                const amount = document.getElementById('harvestAmountInput').value;
-                await harvest(amount);
-                await updateIndicators();
-            });
-
-            if (await isWalletConnected()) {
-                connectButton.innerText = 'Wallet Connected';
-                await updateIndicators();
-            }
+        farmButton.addEventListener('click', async () => {
+            const amount = document.getElementById('amountInput').value;
+            await farm(amount);
+            await updateIndicators();
         });
 
-        async function connectWallet() {
-            if (window.ethereum) {
-                try {
-                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    const account = accounts[0];
-                    console.log(`Connected account: ${account}`);
-                    document.getElementById('connectButton').innerText = 'Wallet Connected';
-                    await updateIndicators();
-                } catch (error) {
-                    console.error('User rejected the request.');
-                }
-            } else {
-                alert('Please install MetaMask!');
+        claimButton.addEventListener('click', async () => {
+            await claim();
+            await updateIndicators();
+        });
+
+        harvestButton.addEventListener('click', async () => {
+            const amount = document.getElementById('harvestAmountInput').value;
+            await harvest(amount);
+            await updateIndicators();
+        });
+
+        if (await isWalletConnected()) {
+            connectButton.innerText = 'Wallet Connected';
+            await updateIndicators();
+        }
+    });
+
+    async function connectWallet() {
+        if (window.ethereum) {
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const account = accounts[0];
+                console.log(`Connected account: ${account}`);
+                document.getElementById('connectButton').innerText = 'Wallet Connected';
+                await updateIndicators();
+            } catch (error) {
+                console.error('User rejected the request.');
             }
+        } else {
+            alert('Please install MetaMask!');
         }
+    }
 
-        async function isWalletConnected() {
-            if (window.ethereum) {
-                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                return accounts.length > 0;
-            }
-            return false;
+    async function isWalletConnected() {
+        if (window.ethereum) {
+            const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+            return accounts.length > 0;
         }
+        return false;
+    }
 
-        async function farm(amount) {
-            const accounts = await web3.eth.getAccounts();
-            const weiAmount = web3.utils.toWei(amount, 'ether');
-            await contract.methods.farm(weiAmount).send({ from: accounts[0] });
-        }
+    async function farm(amount) {
+        const accounts = await web3.eth.getAccounts();
+        const weiAmount = web3.utils.toWei(amount, 'ether');
+        await contract.methods.farm(weiAmount).send({ from: accounts[0] });
+    }
 
-        async function claim() {
-            const accounts = await web3.eth.getAccounts();
-            await contract.methods.claim().send({ from: accounts[0] });
-        }
+    async function claim() {
+        const accounts = await web3.eth.getAccounts();
+        await contract.methods.claim().send({ from: accounts[0] });
+    }
 
-        async function harvest(amount) {
-            const accounts = await web3.eth.getAccounts();
-            const weiAmount = web3.utils.toWei(amount, 'ether');
-            await contract.methods.harvest(weiAmount).send({ from: accounts[0] });
-        }
+    async function harvest(amount) {
+        const accounts = await web3.eth.getAccounts();
+        const weiAmount = web3.utils.toWei(amount, 'ether');
+        await contract.methods.harvest(weiAmount).send({ from: accounts[0] });
+    }
 
-        async function updateIndicators() {
-            const accounts = await web3.eth.getAccounts();
-            const user = accounts[0];
+    async function updateIndicators() {
+        const accounts = await web3.eth.getAccounts();
+        const user = accounts[0];
 
-            const investment = await contract.methods.getUserInvestment(user).call();
-            const earnings = await contract.methods.getUserEarnings(user).call();
+        const investment = await contract.methods.getUserInvestment(user).call();
+        const earnings = await contract.methods.getUserEarnings(user).call();
 
-            document.getElementById('investment').innerText = web3.utils.fromWei(investment, 'ether') + ' BUSD';
-            document.getElementById('earnings').innerText = web3.utils.fromWei(earnings, 'ether') + ' BUSD';
-        }
-    </script>
-</body>
-</html>
+        document.getElementById('investment').innerText = web3.utils.fromWei(investment, 'ether') + ' BUSD';
+        document.getElementById('earnings').innerText = web3.utils.fromWei(earnings, 'ether') + ' BUSD';
+    }
+</script>
