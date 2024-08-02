@@ -1,0 +1,69 @@
+﻿// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+
+
+contract DragonBUSDStaking is Ownable, Pausable, ReentrancyGuard {
+    using SafeMath for uint256;
+    using SafeERC20 for IERC20;
+
+
+    IERC20 public busdToken;
+    uint256 public minStaked;
+    uint256 public stakeFee;
+    bool public canStakePublic;
+    mapping(address => bool) public isSpam;
+    mapping(address => uint256) public withdrawable;
+
+
+    constructor(address _busdTokenAddress) Ownable(msg.sender) {
+        busdToken = IERC20(_busdTokenAddress);
+    }
+
+
+    function farm(uint256 _amount) external whenNotPaused nonReentrant {
+        claim();
+        require(!isSpam[msg.sender], "Account is spam!");
+        require(canStakePublic, "Public stake not opened!");
+        require(_amount > 0, "Invalid amount");
+        require(_amount >= minStaked, "Invalid minimum amount");
+
+
+        uint256 _stakeFee = _amount.mul(stakeFee).div(100);
+        busdToken.safeTransferFrom(msg.sender, owner(), _stakeFee);
+        uint256 remainingToken = _amount.sub(_stakeFee);
+        busdToken.safeTransferFrom(msg.sender, address(this), remainingToken);
+
+
+        // Implement the rest of the farm logic
+    }
+
+
+    function claim() public nonReentrant {
+        uint256 amount = withdrawable[msg.sender];
+        require(amount > 0, "No withdrawable amount");
+        withdrawable[msg.sender] = 0;
+        busdToken.safeTransfer(msg.sender, amount);
+    }
+
+
+    function harvest(uint256 _amount) public nonReentrant {
+        require(_amount > 0, "Invalid amount");
+        require(withdrawable[msg.sender] >= _amount, "Insufficient balance");
+        withdrawable[msg.sender] = withdrawable[msg.sender].sub(_amount);
+        busdToken.safeTransfer(msg.sender, _amount);
+    }
+
+
+    function emergencyWithdrawtokens(IERC20 _token, uint256 _amount) external onlyOwner {
+        require(_amount > 0, "Invalid amount");
+        _token.safeTransfer(msg.sender, _amount);
+    }
+}
