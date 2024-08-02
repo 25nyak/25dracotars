@@ -1,1 +1,15 @@
+/* Add this to your existing styles.css file */
+#connectButton {
+    padding: 10px;
+    background-color: #007bff; /* Blue button background */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+#connectButton:hover {
+    background-color: #0056b3;
+}
 
