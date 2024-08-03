@@ -1,29 +1,15 @@
 {
   "name": "dragon-busd-staking",
   "version": "1.0.0",
-  "description": "A DApp for staking BUSD in the DragonBUSDStaking contract.",
+  "description": "Dragon BUSD Staking DApp",
   "main": "index.js",
   "scripts": {
-    "start": "http-server public",
-    "deploy": "gh-pages -d public"
+    "start": "live-server public"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/yourusername/your-repo.git"
-  },
-  "keywords": [
-    "DApp",
-    "staking",
-    "BUSD",
-    "smart-contract"
-  ],
-  "author": "Your Name",
-  "license": "MIT",
   "dependencies": {
-    "web3": "^1.5.0"
+    "web3": "^1.6.0"
   },
-  "devDependencies": {
-    "http-server": "^0.12.3",
-    "gh-pages": "^3.2.3"
-  }
+  "devDependencies": {},
+  "author": "",
+  "license": "MIT"
 }
