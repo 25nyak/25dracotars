@@ -1,88 +1,80 @@
-import web3 from './web3.js';
-import contract from './contract.js';
+// public/js/main.js
+import Web3 from "web3";
+import { abi } from "./contract.js";
 
-document.addEventListener('DOMContentLoaded', async () => {
-    const connectButton = document.getElementById('connectButton');
-    const farmButton = document.getElementById('farmButton');
-    const claimButton = document.getElementById('claimButton');
-    const harvestButton = document.getElementById('harvestButton');
-
-    connectButton.addEventListener('click', connectWallet);
-
-    farmButton.addEventListener('click', async () => {
-        const amount = document.getElementById('amountInput').value;
-        console.log(`Farming ${amount} BUSD`);
-        await farm(amount);
-        await updateIndicators();
-    });
-
-    claimButton.addEventListener('click', async () => {
-        console.log('Claiming rewards');
-        await claim();
-        await updateIndicators();
-    });
-
-    harvestButton.addEventListener('click', async () => {
-        const amount = document.getElementById('harvestAmountInput').value;
-        console.log(`Harvesting ${amount} BUSD`);
-        await harvest(amount);
-        await updateIndicators();
-    });
-
-    if (await isWalletConnected()) {
-        connectButton.innerText = 'Wallet Connected';
-        await updateIndicators();
-    }
-});
+const contractAddress = "0x0e7aa2284f327da941f25243c59362be80860492";
+let web3;
+let contract;
+let userAddress;
 
 async function connectWallet() {
     if (window.ethereum) {
+        web3 = new Web3(window.ethereum);
         try {
-            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            const account = accounts[0];
-            console.log(`Connected account: ${account}`);
-            document.getElementById('connectButton').innerText = 'Wallet Connected';
-            await updateIndicators();
+            const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+            userAddress = accounts[0];
+            contract = new web3.eth.Contract(abi, contractAddress);
+            document.getElementById("connectButton").innerText = `Connected: ${userAddress}`;
+            updateBalances();
         } catch (error) {
-            console.error('User rejected the request.');
+            console.error("User denied account access", error);
         }
     } else {
-        alert('Please install MetaMask!');
+        alert("Please install MetaMask!");
     }
 }
 
-async function isWalletConnected() {
-    if (window.ethereum) {
-        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-        return accounts.length > 0;
+async function updateBalances() {
+    try {
+        const investment = await contract.methods.withdrawable(userAddress).call();
+        const earnings = await contract.methods.withdrawable(userAddress).call(); // Assuming earnings are the same method, adjust if needed
+        document.getElementById("investment").innerText = `${web3.utils.fromWei(investment, "ether")} BUSD`;
+        document.getElementById("earnings").innerText = `${web3.utils.fromWei(earnings, "ether")} BUSD`;
+    } catch (error) {
+        console.error("Error fetching balances", error);
     }
-    return false;
 }
 
-async function farm(amount) {
-    const accounts = await web3.eth.getAccounts();
-    const weiAmount = web3.utils.toWei(amount, 'ether');
-    await contract.methods.farm(weiAmount).send({ from: accounts[0] });
+async function farm() {
+    const amount = document.getElementById("amountInput").value;
+    if (amount > 0) {
+        const amountInWei = web3.utils.toWei(amount, "ether");
+        try {
+            await contract.methods.farm(amountInWei).send({ from: userAddress });
+            updateBalances();
+        } catch (error) {
+            console.error("Error farming", error);
+        }
+    } else {
+        alert("Please enter a valid amount to stake.");
+    }
 }
 
 async function claim() {
-    const accounts = await web3.eth.getAccounts();
-    await contract.methods.claim().send({ from: accounts[0] });
+    try {
+        await contract.methods.claim().send({ from: userAddress });
+        updateBalances();
+    } catch (error) {
+        console.error("Error claiming", error);
+    }
 }
 
-async function harvest(amount) {
-    const accounts = await web3.eth.getAccounts();
-    const weiAmount = web3.utils.toWei(amount, 'ether');
-    await contract.methods.harvest(weiAmount).send({ from: accounts[0] });
+async function harvest() {
+    const amount = document.getElementById("harvestAmountInput").value;
+    if (amount > 0) {
+        const amountInWei = web3.utils.toWei(amount, "ether");
+        try {
+            await contract.methods.harvest(amountInWei).send({ from: userAddress });
+            updateBalances();
+        } catch (error) {
+            console.error("Error harvesting", error);
+        }
+    } else {
+        alert("Please enter a valid amount to harvest.");
+    }
 }
 
-async function updateIndicators() {
-    const accounts = await web3.eth.getAccounts();
-    const user = accounts[0];
-
-    const investment = await contract.methods.withdrawable(user).call();
-    const earnings = await contract.methods.stakeFee(user).call();
-
-    document.getElementById('investment').innerText = web3.utils.fromWei(investment, 'ether') + ' BUSD';
-    document.getElementById('earnings').innerText = web3.utils.fromWei(earnings, 'ether') + ' BUSD';
-}
+document.getElementById("connectButton").addEventListener("click", connectWallet);
+document.getElementById("farmButton").addEventListener("click", farm);
+document.getElementById("claimButton").addEventListener("click", claim);
+document.getElementById("harvestButton").addEventListener("click", harvest);
