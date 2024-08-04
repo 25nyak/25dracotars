@@ -3,35 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dragon BUSD Staking</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>DragonBUSDStaking DApp</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.6.1/dist/web3.min.js"></script>
+    <script defer src="main.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>Dragon BUSD Staking</h1>
-        <img src="images/dragon.png" alt="Dragon Logo" class="logo">
-
-        <button id="connectButton">Connect Wallet</button>
-
-        <div class="stake-section">
-            <input type="text" id="amountInput" placeholder="Enter amount to stake">
-            <button id="farmButton">Farm</button>
-        </div>
-
-        <div class="claim-section">
-            <button id="claimButton">Claim</button>
-        </div>
-
-        <div class="harvest-section">
-            <input type="text" id="harvestAmountInput" placeholder="Enter amount to harvest">
-            <button id="harvestButton">Harvest</button>
-        </div>
-
-        <div class="indicators">
+    <header>
+        <img src="media/dragon-wbg.0b5d735dfc99821c8be4.png" alt="Dragon Logo" class="logo">
+        <h1>DragonBUSDStaking DApp</h1>
+    </header>
+    <main>
+        <section class="info">
             <p>Your Investment: <span id="investment">Loading...</span></p>
             <p>Your Earnings: <span id="earnings">Loading...</span></p>
-        </div>
-    </div>
-    <script type="module" src="js/main.js"></script>
+        </section>
+        <section class="actions">
+            <button id="farmButton">Farm</button>
+            <button id="harvestButton">Harvest</button>
+            <button id="claimButton">Claim</button>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 DragonBUSDStaking. All rights reserved.</p>
+    </footer>
 </body>
 </html>
