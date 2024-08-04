@@ -5,7 +5,7 @@ let web3;
 let contract;
 let userAddress;
 
-async function initialize() {
+async function connectWallet() {
     if (window.ethereum) {
         try {
             web3 = new Web3(window.ethereum);
@@ -13,10 +13,10 @@ async function initialize() {
             const accounts = await web3.eth.getAccounts();
             userAddress = accounts[0];
             contract = new web3.eth.Contract(abi, contractAddress);
-            console.log("Initialization successful. User address:", userAddress);
+            console.log("Wallet connected. User address:", userAddress);
             updateBalances();
         } catch (error) {
-            console.error("Error initializing Web3:", error);
+            console.error("Error connecting wallet:", error);
         }
     } else {
         alert("Please install MetaMask!");
@@ -35,6 +35,11 @@ async function updateBalances() {
         document.getElementById("earnings").innerText = "Error";
     }
 }
+
+document.getElementById("connectWalletButton").addEventListener("click", async () => {
+    console.log("Connect Wallet button clicked");
+    await connectWallet();
+});
 
 document.getElementById("farmButton").addEventListener("click", async () => {
     console.log("Farm button clicked");
@@ -66,4 +71,4 @@ document.getElementById("claimButton").addEventListener("click", async () => {
     }
 });
 
-window.addEventListener("load", initialize);
+window.addEventListener("load", connectWallet);
